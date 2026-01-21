@@ -1,0 +1,38 @@
+# rules/rules.py
+import re
+
+def get_rule_score(message: str, sender: str) -> tuple[int, list[str], list[str]]:
+    keywords = {
+        "urgency": ["urgent", "now", "immediate", "today", "expire", "suspend", "last chance"],
+        "threat": ["threat", "arrest", "blackmail", "emergency", "fine", "jail", "police"],
+        "reward": ["win", "prize", "claim", "bonus", "free money", "congratulations"],
+        "impersonation": ["safaricom", "m-pesa", "fuliza", "equity", "kcb", "government"],
+        "transaction": ["reversal", "reverse", "confirm", "send", "transfer", "pay now"],
+        "emotional": ["fear", "reward", "urgency", "isolation"]  # From PDF manipulation patterns
+    }
+    ussd_pattern = re.compile(r"\*\d{2,3}\#")
+    link_pattern = re.compile(r"https?://\S+")
+    
+    msg_lower = message.lower()
+    flags = []
+    score = 0
+    
+    for cat, kws in keywords.items():
+        if any(kw in msg_lower for kw in kws):
+            score += 2
+            flags.append(cat)
+    
+    if ussd_pattern.search(message):
+        score += 3
+        flags.append("ussd")
+    
+    links = link_pattern.findall(message)
+    if links:
+        score += 2
+        flags.append("link")
+    
+    if sender.isdigit() or sender.startswith("254"):
+        score += 1
+        flags.append("suspicious_sender")
+    
+    return score, flags, links
