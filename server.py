@@ -17,8 +17,7 @@ def receive_report():
     
     # Simulate learning: Update trends/blacklists
     category = report["type"]
-    emerging_trends[category] = emerging_trends.get(category, 0) + 1
-    blacklist_senders.add(report["sender_hash"])  # Accelerate blacklisting
+    emerging_trends[category] = emerging_trends.get(category, 0) + report.get("ml_prob", 0)
     
     print(f"Received report: {report}")  # Log for demo
     return jsonify({"status": "received", "trends": emerging_trends}), 200

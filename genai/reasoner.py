@@ -7,7 +7,7 @@ def genai_classify(message: str, sender: str, rule_flags: list[str]) -> dict:
     prompt = f"""You are FraudGuard — real-time scam detector for Safaricom.
 Message: "{message}"
 Sender: {sender}
-Quick flags: {', '.join(rule_flags) if rule_flags else 'none'}
+Quick flags: {', '.join(rule_flags) if rule_flags else 'none'}  # Now includes ML prob if passed
 
 Detect: urgency, threats, rewards, impersonation (Safaricom/M-PESA/Fuliza), fake reversals, links, USSD misuse, emotional manipulation (fear/reward/urgency/isolation).
 Classify ONLY as: Safe | Hoax | Extortion | Impersonation | Transactional Scam | High Risk
