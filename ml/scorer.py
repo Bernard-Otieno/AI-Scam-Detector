@@ -56,7 +56,24 @@ def hybrid_score(message: str, sender: str = "Unknown") -> dict:
     ml_score = int(ml_prob * 10)  # Scale to 0-10 for consistency
     
     # Layer 3: GenAI (reasoning with rules + ML input)
-    genai_result = genai_classify(message, sender, rule_flags + [f"ML scam prob: {ml_prob:.2f}"])
+    need_genai = (
+        rule_score >= 3 or
+        ml_prob >= 0.35 or
+        "link" in rule_flags
+    )
+
+    if need_genai:
+        genai_result = genai_classify(
+            message,
+            sender,
+            rule_flags + [f"ML scam prob: {ml_prob:.2f}"]
+        )
+    else:
+        genai_result = {
+            "category": "Safe",
+            "risk": int(ml_prob * 10),
+            "explanation": "Low-risk message based on on-device analysis."
+        }
     
     # Final hybrid: Weighted average risk, GenAI category/explanation
     final_risk = int((rule_score * 0.2 + ml_score * 0.3 + genai_result.get("risk", 0) * 0.5))
@@ -64,7 +81,9 @@ def hybrid_score(message: str, sender: str = "Unknown") -> dict:
     explanation = genai_result["explanation"] + f" (ML contrib: scam prob {ml_prob:.2f})"
     
     # Overrides from PDF signals
-    if "impersonation" in rule_flags:
+    if "reward" in rule_flags and "untrusted_domain" in rule_flags:
+        category = "Promotion Scam"
+    elif "impersonation" in rule_flags:
         category = "Impersonation"
     elif "transaction" in rule_flags:
         category = "Transactional Scam"

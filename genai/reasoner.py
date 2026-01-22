@@ -10,7 +10,11 @@ Sender: {sender}
 Quick flags: {', '.join(rule_flags) if rule_flags else 'none'}  # Now includes ML prob if passed
 
 Detect: urgency, threats, rewards, impersonation (Safaricom/M-PESA/Fuliza), fake reversals, links, USSD misuse, emotional manipulation (fear/reward/urgency/isolation).
-Classify ONLY as: Safe | Hoax | Extortion | Impersonation | Transactional Scam | High Risk
+Analyze this message for scam potential: "{message}" from sender "{sender}".
+    Detect intent, context, and patterns like urgency, threats, rewards, impersonation, transactions, links, USSD.
+    Classify ONLY as: Safe | Promotion Scam | Hoax | Extortion | Impersonation | Transactional Scam
+    Provide a brief explanation and risk score (0-10).
+    Output format: Category: [cat] | Risk: [score] | Explanation: [text]
 Risk score: 0–10 (integer)
 One-sentence explanation.
 
@@ -27,7 +31,7 @@ Explanation: Z"""
     }
     
     try:
-        resp = requests.post(OLLAMA_URL, json=payload, timeout=6)
+        resp = requests.post(OLLAMA_URL, json=payload, timeout=30)
         resp.raise_for_status()
         result = json.loads(resp.text)
         output = result.get("response", "").strip()

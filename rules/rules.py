@@ -6,7 +6,10 @@ def get_rule_score(message: str, sender: str) -> tuple[int, list[str], list[str]
     keywords = {
         "urgency": ["urgent", "now", "immediate", "today", "expire", "suspend", "last chance"],
         "threat": ["threat", "arrest", "blackmail", "emergency", "fine", "jail", "police"],
-        "reward": ["win", "prize", "claim", "bonus", "free money", "congratulations"],
+        "reward": [
+            "win", "prize", "claim", "bonus", "free", "congratulations",
+            "points", "bonga", "redeem", "reward", "promo", "expire", "expires"
+        ],
         "impersonation": ["safaricom", "m-pesa", "fuliza", "equity", "kcb", "government"],
         "transaction": ["reversal", "reverse", "confirm", "send", "transfer", "pay now"],
         "emotional": ["fear", "reward", "urgency", "isolation"]  # From PDF manipulation patterns
@@ -27,10 +30,17 @@ def get_rule_score(message: str, sender: str) -> tuple[int, list[str], list[str]
         score += 3
         flags.append("ussd")
     
+    trusted_domains = ["safaricom.co.ke", "https://bit.ly/mpesalnk", "https://www.baze.co.ke", "pesapal.com"]
+
     links = link_pattern.findall(message)
     if links:
         score += 2
         flags.append("link")
+
+        for link in links:
+            if not any(td in link for td in trusted_domains):
+                score += 3
+                flags.append("untrusted_domain")
     
     if sender.isdigit() or sender.startswith("254"):
         score += 1
