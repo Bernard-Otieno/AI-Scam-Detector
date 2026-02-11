@@ -1,0 +1,43 @@
+import sys
+import onnx
+import struct
+
+# --- FIX 1: Manual ONNX Patch (Prevents the bfloat16 error) ---
+def _float32_to_bfloat16(fval):
+    ival = int.from_bytes(struct.pack("<f", fval), "little")
+    rounded = ((ival >> 16) & 1) + 0x7FFF
+    return (ival + rounded) >> 16
+
+if not hasattr(onnx.helper, 'float32_to_bfloat16'):
+    onnx.helper.float32_to_bfloat16 = _float32_to_bfloat16
+
+# --- FIX 2: Create a "Fake" LiteRT module using Full TensorFlow ---
+# This tricks onnx2tf into thinking LiteRT is installed
+import tensorflow as tf
+import types
+
+try:
+    # Create the fake module path: ai_edge_litert.interpreter
+    litert = types.ModuleType("ai_edge_litert")
+    litert.interpreter = types.ModuleType("ai_edge_litert.interpreter")
+    # Point the 'Interpreter' class to the one inside full TensorFlow
+    litert.interpreter.Interpreter = tf.lite.Interpreter
+    
+    # Inject into the system so the 'import' works later
+    sys.modules["ai_edge_litert"] = litert
+    sys.modules["ai_edge_litert.interpreter"] = litert.interpreter
+    print("✅ Successfully redirected LiteRT to TensorFlow.")
+except Exception as e:
+    print(f"❌ Patch failed: {e}")
+
+# --- NOW RUN THE CONVERSION ---
+import onnx2tf
+
+onnx2tf.convert(
+    input_onnx_file_path="model.onnx",
+    output_folder_path="model_tflite",
+    copy_onnx_input_output_names_to_tflite=True,
+    non_verbose=True
+)
+
+print("🚀 Conversion complete! Check the 'model_tflite' folder.")
