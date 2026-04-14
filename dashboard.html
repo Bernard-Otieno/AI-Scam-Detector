@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Safaricom Fraud Detection — Privacy-First Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0f1e;
+      color: #e0e6f0;
+      font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ───────────────────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #00b050 0%, #007a35 100%);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 20px rgba(0,176,80,0.3);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .safaricom-logo {
+      font-size: 28px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .safaricom-logo span {
+      color: #ffdd00;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 2px;
+    }
+
+    .privacy-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.25);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .privacy-dot {
+      width: 10px;
+      height: 10px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(0,255,136,0.7); }
+      70%  { box-shadow: 0 0 0 8px rgba(0,255,136,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
+    }
+
+    /* ── PRIVACY BANNER ──────────────────────────────────────────────── */
+    .privacy-banner {
+      background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+      color: #003d20;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 2px solid #00ff88;
+    }
+
+    .privacy-banner-text {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .privacy-icon {
+      font-size: 20px;
+    }
+
+    /* ── STATS ROW ───────────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 24px 32px 0;
+    }
+
+    .stat-card {
+      background: #111827;
+      border: 1px solid #1f2d45;
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .stat-card.green::before  { background: #00b050; }
+    .stat-card.red::before    { background: #ef4444; }
+    .stat-card.yellow::before { background: #f59e0b; }
+    .stat-card.blue::before   { background: #3b82f6; }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-card.green  .stat-value { color: #00b050; }
+    .stat-card.red    .stat-value { color: #ef4444; }
+    .stat-card.yellow .stat-value { color: #f59e0b; }
+    .stat-card.blue   .stat-value { color: #3b82f6; }
+
+    .stat-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    /* ── MAIN CONTENT ────────────────────────────────────────────────── */
+    .main {
+      padding: 24px 32px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    .panel {
+      background: #111827;
+      border: 1px solid #1f2d45;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #1f2d45;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e0e6f0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .panel-count {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #6b7280;
+      background: #0d1520;
+      border-bottom: 1px solid #1f2d45;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #1a2540;
+      transition: background 0.15s;
+      animation: rowIn 0.4s ease;
+    }
+
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateY(-10px); background: rgba(0,176,80,0.15); }
+      to   { opacity: 1; transform: translateY(0);     background: transparent; }
+    }
+
+    tbody tr:hover { background: #1a2540; }
+
+    tbody td {
+      padding: 14px 20px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .time-cell    { color: #9ca3af; font-family: monospace; font-size: 12px; }
+    .hash-cell    { color: #60a5fa; font-family: monospace; font-size: 12px; }
+
+    /* ── BADGES ──────────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-blocked {
+      background: rgba(239,68,68,0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    .badge-allowed {
+      background: rgba(0,176,80,0.15);
+      color: #00b050;
+      border: 1px solid rgba(0,176,80,0.3);
+    }
+
+    .badge-impersonation { background: rgba(239,68,68,0.1);  color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+    .badge-hoax          { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+    .badge-transaction   { background: rgba(239,68,68,0.1);  color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .badge-extortion     { background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid rgba(168,85,247,0.2); }
+    .badge-safe          { background: rgba(0,176,80,0.1);   color: #00b050; border: 1px solid rgba(0,176,80,0.2); }
+    .badge-suspicious    { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+
+    /* ── RISK BAR ────────────────────────────────────────────────────── */
+    .risk-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .risk-bar-bg {
+      width: 60px;
+      height: 6px;
+      background: #1f2d45;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .risk-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .risk-text {
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 24px;
+    }
+
+    /* ── SIDE PANEL ──────────────────────────────────────────────────── */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .privacy-proof {
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,204,106,0.05) 100%);
+      border: 2px solid #00ff88;
+      border-radius: 12px;
+    }
+
+    .privacy-proof-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #00ff88;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .privacy-proof-item {
+      font-size: 12px;
+      color: #9ca3af;
+      margin: 6px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .privacy-proof-item::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #00ff88;
+      font-weight: bold;
+    }
+
+    .features-preview {
+      padding: 16px;
+      background: #0d1520;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #60a5fa;
+    }
+
+    .feature-line {
+      margin: 3px 0;
+      color: #6b7280;
+    }
+
+    .feature-value {
+      color: #f59e0b;
+    }
+
+    /* ── EMPTY STATE ─────────────────────────────────────────────────── */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: #374151;
+    }
+
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state-text { font-size: 14px; }
+
+    /* ── STATUS BAR ──────────────────────────────────────────────────── */
+    .status-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #0d1520;
+      border-top: 1px solid #1f2d45;
+      padding: 8px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .status-dot.connected { background: #00b050; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0d1520; }
+    ::-webkit-scrollbar-thumb { background: #1f2d45; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ───────────────────────────────────────────────────────── -->
+  <div class="header">
+    <div class="header-left">
+      <div>
+        <div class="safaricom-logo">SAFARICOM <span>🛡</span></div>
+        <div class="header-subtitle">Fraud Intelligence Dashboard · Privacy-First Architecture</div>
+      </div>
+    </div>
+    <div class="privacy-badge">
+      <div class="privacy-dot"></div>
+      PRIVACY PROTECTED
+    </div>
+  </div>
+
+  <!-- ── PRIVACY BANNER ────────────────────────────────────────────────── -->
+  <div class="privacy-banner">
+    <div class="privacy-banner-text">
+      <span class="privacy-icon">🔒</span>
+      <span>MESSAGE CONTENT NEVER STORED · ONLY FEATURES + HASHES LOGGED · PRIVACY BY DESIGN</span>
+    </div>
+    <span style="font-size:11px; opacity:0.7;">GDPR / DATA PROTECTION ACT COMPLIANT</span>
+  </div>
+
+  <!-- ── STATS ROW ─────────────────────────────────────────────────────── -->
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-label">Messages Analyzed</div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-sub">All time</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Threats Detected</div>
+      <div class="stat-value" id="stat-blocked">0</div>
+      <div class="stat-sub">Pattern-based detection</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Clean Messages</div>
+      <div class="stat-value" id="stat-clean">0</div>
+      <div class="stat-sub">No scam patterns</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-label">Detection Rate</div>
+      <div class="stat-value" id="stat-rate">—</div>
+      <div class="stat-sub">Accuracy</div>
+    </div>
+  </div>
+
+  <!-- ── MAIN CONTENT ──────────────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- LEFT: Events Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">📡 Intercepted Event Log (Features Only)</div>
+        <div class="panel-count" id="table-count">0 events</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Sender Hash</th>
+            <th>Threat Category</th>
+            <th>Risk</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="events-table-body">
+        </tbody>
+      </table>
+      <div id="empty-table" class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-text">Waiting for events...<br/>Send a test SMS to see it appear here.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Privacy Proof -->
+    <div class="side-panel">
+
+      <div class="privacy-proof">
+        <div class="privacy-proof-title">🔐 Privacy Guarantee</div>
+        <div class="privacy-proof-item">Message content never logged</div>
+        <div class="privacy-proof-item">Real phone numbers never stored</div>
+        <div class="privacy-proof-item">Only features extracted (18 numbers)</div>
+        <div class="privacy-proof-item">Hashes are irreversible</div>
+        <div class="privacy-proof-item">Cannot reconstruct original text</div>
+        
+        <div class="features-preview" id="features-preview">
+          <div style="color:#00ff88; font-weight:bold; margin-bottom:8px;">WHAT WE LOG:</div>
+          <div class="feature-line">sender_hash: <span class="feature-value">"2e3b61e1"</span></div>
+          <div class="feature-line">features: {</div>
+          <div class="feature-line">  hasReward: <span class="feature-value">1</span></div>
+          <div class="feature-line">  hasThreat: <span class="feature-value">0</span></div>
+          <div class="feature-line">  messageLength: <span class="feature-value">52</span></div>
+          <div class="feature-line">  ... (18 features)</div>
+          <div class="feature-line">}</div>
+          <div class="feature-line">risk_score: <span class="feature-value">9</span></div>
+          <div style="color:#6b7280; margin-top:12px; font-size:10px;">
+            ⚠️ No message content present<br/>
+            ⚠️ Cannot reverse features to text
+          </div>
+        </div>
+      </div>
+
+      <!-- Network Status -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🌐 System Status</div>
+        </div>
+        <div style="padding:16px 20px; display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:12px;">
+            <span style="color:#6b7280">Privacy Mode</span>
+            <span style="color:#00ff88; font-weight:600">● ACTIVE</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;">
+            <span style="color:#6b7280">Feature Extraction</span>
+            <span style="color:#00b050; font-weight:600">● ONLINE</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;">
+            <span style="color:#6b7280">Content Storage</span>
+            <span style="color:#ef4444; font-weight:600">● DISABLED</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;">
+            <span style="color:#6b7280">Last Event</span>
+            <span style="color:#9ca3af; font-weight:600" id="last-event-time">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── STATUS BAR ────────────────────────────────────────────────────── -->
+  <div class="status-bar">
+    <span><span class="status-dot connected"></span>Connected to Firebase</span>
+    <span>Project: safaricom-scam-demo</span>
+    <span>Collection: scam_events</span>
+    <span id="clock"></span>
+  </div>
+
+  <!-- ── FIREBASE SDK ──────────────────────────────────────────────────── -->
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, limit }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAk0jItBCP_m2plq7pbM7w-VrffsAW3nuw",
+      authDomain:        "safaricom-scam-demo.firebaseapp.com",
+      projectId:         "safaricom-scam-demo",
+      storageBucket:     "safaricom-scam-demo.firebasestorage.app",
+      messagingSenderId: "599526885529",
+      appId:             "1:599526885529:web:e531ab1e4f72188654d008"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    const tableBody     = document.getElementById("events-table-body");
+    const emptyTable    = document.getElementById("empty-table");
+    const statTotal     = document.getElementById("stat-total");
+    const statBlocked   = document.getElementById("stat-blocked");
+    const statClean     = document.getElementById("stat-clean");
+    const statRate      = document.getElementById("stat-rate");
+    const tableCount    = document.getElementById("table-count");
+    const lastEventTime = document.getElementById("last-event-time");
+
+    function updateClock() {
+      document.getElementById("clock").textContent =
+        new Date().toLocaleTimeString("en-KE", { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function categoryBadgeClass(category) {
+      const c = (category || "").toLowerCase();
+      if (c.includes("impersonation")) return "badge-impersonation";
+      if (c.includes("hoax") || c.includes("reward")) return "badge-hoax";
+      if (c.includes("transaction")) return "badge-transaction";
+      if (c.includes("extortion") || c.includes("threat")) return "badge-extortion";
+      if (c === "safe") return "badge-safe";
+      return "badge-suspicious";
+    }
+
+    function riskColor(score) {
+      if (score >= 7) return "#ef4444";
+      if (score >= 4) return "#f59e0b";
+      return "#00b050";
+    }
+
+    function buildTableRow(data) {
+      const isBlocked = data.isBlocked || data.action?.startsWith("BLOCK");
+      const risk      = data.riskScore || 0;
+      const color     = riskColor(risk);
+      const barWidth  = Math.min((risk / 10) * 100, 100);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="time-cell">${data.timestamp || "—"}</td>
+        <td class="hash-cell">ID: ${data.senderHash || "??????"}</td>
+        <td>
+          <span class="badge ${categoryBadgeClass(data.category)}">
+            ${data.category || "Unknown"}
+          </span>
+        </td>
+        <td>
+          <div class="risk-bar-wrap">
+            <div class="risk-bar-bg">
+              <div class="risk-bar-fill"
+                   style="width:${barWidth}%; background:${color}">
+              </div>
+            </div>
+            <span class="risk-text" style="color:${color}">${risk}</span>
+          </div>
+        </td>
+        <td>
+          <span class="badge ${isBlocked ? 'badge-blocked' : 'badge-allowed'}">
+            ${isBlocked ? '🚫 BLOCKED' : '✅ ALLOWED'}
+          </span>
+        </td>
+      `;
+      return tr;
+    }
+
+    const q = query(
+      collection(db, "scam_events"),
+      orderBy("epochMillis", "desc"),
+      limit(50)
+    );
+
+    onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map(d => d.data());
+
+      const total   = docs.length;
+      const blocked = docs.filter(d => d.isBlocked || d.action?.startsWith("BLOCK")).length;
+      const clean   = total - blocked;
+      const rate    = total > 0 ? Math.round((blocked / total) * 100) : 0;
+
+      statTotal.textContent   = total;
+      statBlocked.textContent = blocked;
+      statClean.textContent   = clean;
+      statRate.textContent    = total > 0 ? rate + "%" : "—";
+      tableCount.textContent  = total + " event" + (total !== 1 ? "s" : "");
+
+      if (docs.length > 0) {
+        lastEventTime.textContent = docs[0].timestamp || "—";
+      }
+
+      tableBody.innerHTML = "";
+      if (docs.length === 0) {
+        emptyTable.style.display = "block";
+      } else {
+        emptyTable.style.display = "none";
+        docs.forEach(data => {
+          tableBody.appendChild(buildTableRow(data));
+        });
+      }
+    }, (error) => {
+      console.error("Firebase error:", error);
+    });
+
+  </script>
+</body>
+</html>

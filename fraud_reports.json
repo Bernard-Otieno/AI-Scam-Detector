@@ -1,0 +1,12 @@
+[
+  {
+    "subscriber": "+254743941435",
+    "scam_sender": "+254700000000",
+    "message": "Congratulations! You have won KSH 5000",
+    "category": "Hoax / Fake Reward",
+    "risk_score": 9,
+    "sent_at": "2026-02-16 15:21:40",
+    "reported_at": "2026-02-16 15:00:00",
+    "status": "USER_CONFIRMED_SCAM"
+  }
+]
